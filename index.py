@@ -1,6 +1,7 @@
 import urllib.request
 import pandas as pd
 import regex as re
+import html5lib
 import requests
 import demjson
 import os
@@ -30,47 +31,25 @@ class Converter:
         self.Yes_No = Yes_No
     
     def MainInnerHTML(self):
-        if self.Yes_No == "YES":
-            req = requests.get(self.URL, headers = self.header)
-            soup = BeautifulSoup(req.content, 'html.parser')
+        req = requests.get(self.URL)
+        soup = BeautifulSoup(req.content, 'html.parser')
 
-            """
-            soup = soup.prettify()
-            with open("out.txt","w") as out:
-                for i in range(0, len(soup)):
-                    try:
-                        out.write(soup[i])
-                    except:
-                        1+1
-            """
-            
-            for tag in soup.findAll("div"):
-                if str(tag["role"][0]) == "presentation":
-                    print("Found")
-                    return tag.encode_contents()
-                else:
-                    print("Not Found")
-        else:
-            # Only 30
-            req = requests.get(self.URL)
-            soup = BeautifulSoup(req.content, 'html.parser')
-
-            """
-            soup = soup.prettify()
-            with open("out.txt","w") as out:
-                for i in range(0, len(soup)):
-                    try:
-                        out.write(soup[i])
-                    except:
-                        1+1
-            """
-            
-            for tag in soup.findAll("ol"):
-                if str(tag["class"][0]) == "tracklist":
-                    print("Found")
-                    return tag.encode_contents()
-                else:
-                    print("Not Found")
+        """
+        soup = soup.prettify()
+        with open("out.txt","w") as out:
+            for i in range(0, len(soup)):
+                try:
+                    out.write(soup[i])
+                except:
+                    1+1
+        """
+        
+        for tag in soup.findAll("ol"):
+            if str(tag["class"][0]) == "tracklist":
+                print("Found")
+                return tag.encode_contents()
+            else:
+                print("Not Found")
       
     def Convert_Layman(self):
         if self.Yes_No == "YES":
@@ -280,6 +259,122 @@ class Converter:
 
                 print("https://www.youtube.com/results?search_query=" + str(search_query) + "&sp=CAM%253D")
 
+
+                """
+                tries = 0
+
+                while tries < 3:
+                    try:
+                        for tag in soup.findAll("script"):
+                            if "nonce" in tag.attrs:
+                                if "var ytInitialData" in str(tag.encode_contents()):
+                                    if Found == "False":                              
+                                        json_data = str(tag.encode_contents())
+                                        json_data = json_data.replace("b'var ytInitialData = ", "")
+                                        json_data = json_data.replace("}}}}}}};'", "}}}}}}}")
+                                        json_data = json_data.replace("/", "")
+
+                                        cut = []
+
+                                        for j in range(0, json_data.count('""')):
+                                            for i in range(0, (len(json_data) - len(cut))):
+                                                try:
+                                                    if json_data[i] == '"':
+                                                        if json_data[i-1] == '"':
+                                                            replacement = r"\*"
+                                                            replacement = replacement.replace('*', '')
+                                                            json_data = json_data.replace(replacement, "")
+                                                            if json_data[i+1] != '}' and json_data[i+1] != ',':
+                                                                json_data = list(json_data)
+                                                                del(json_data[i])
+                                                                json_data = "".join(json_data)
+                                                                cut.append(i)
+                                                                print("cutting" + str(i) + " with 1")
+                                                        if json_data[i-1] == '"':
+                                                            if json_data[i-2] != ":":
+                                                                json_data = list(json_data)
+                                                                del(json_data[i])
+                                                                json_data = "".join(json_data)
+                                                                cut.append(i)
+                                                                print("cutting" + str(i) + " with 2")
+                                                        if json_data[i-1] == ":":
+                                                            inside = re.search(''-'d', s)
+                                                except:
+                                                    1+1
+                                        
+                                        '''
+
+                                        # Replace with "" instead of "'"
+                                            Replace all "'" or '"' inside of the two main with an empty string...
+
+                                        for j in range(0, json_data.count('"')):
+                                            inside = []
+                                            for j in range(0, len(json_data)):
+                                                if json_data[j] == '"':
+                                                    while state == "True":
+                                                        j += 1
+                                                        if json_data[j] == '"':
+                                                            if json_data[j+1] != "}" and json_data[j+1] != ",":
+                                                                state = "False"
+                                                        else:
+                                                            inside.append(j)
+                                        '''
+                                                    
+
+
+
+
+
+                                        # Escape issue..."
+                                        '''
+                                        letter_list = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","'",'"']
+                                        for letter in letter_list:
+                                            replacement = r"\*" + letter
+                                            replacement = replacement.replace('*', '')
+                                            to_replace = r"\\"
+                                            print(replacement)
+                                            json_data = json_data.replace(replacement, to_replace)
+                                        '''
+
+                                        replacement = r"\*"
+                                        replacement = replacement.replace('*', '')
+                                        json_data = json_data.replace(replacement, "")
+                                        
+                                        json_file = open("data.json", "w")
+                                        json_file.write(json_data)
+                                        json_file.close()
+                                        
+                                        json_data = json.loads(json_data)
+                                        '''
+                                        "contents": {
+                                            "twoColumnSearchResultsRenderer": {
+                                                "primaryContents": {
+                                                    "sectionListRenderer": {
+                                                        "contents": [
+                                                            {"itemSectionRenderer": {
+                                                                "contents": [
+                                                                    {"videoRenderer": {
+                                                                        "videoId": "sMmTkKz60W8",
+                                                                        "viewCountText": {
+                                                                            "simpleText": "247,705,544 views"
+                                                                    {"videoRenderer": {
+                                                                        "videoId": "sMmTkKz60W8",
+                                                                        "viewCountText": {
+                                                                            "simpleText": "247,705,544 views"
+                                        '''
+                                        #print(json_data.keys())
+                                        #print(json_data["contents"])
+                                        #print(json_data["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]["contents"][0])
+                                        
+                                        '''
+                                        for i in range(0, len(json_data"contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]["contents"[0]]["itemSectionRenderer"]["contents"])):
+                                            json_data[0]["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]["contents"[0]]["itemSectionRenderer"]["contents"[i]]
+                                        '''
+                    except:
+                        print("Failed json capture for " + Songs[i] + "... for the " + str(tries) + " time retrying...")
+                        tries += 1
+                """
+
                 for tag in soup.findAll("script"):
                     if "nonce" in tag.attrs:
                         if "var ytInitialData" in str(tag.encode_contents()):
@@ -304,7 +399,7 @@ class Converter:
                                                         del(json_data[i])
                                                         json_data = "".join(json_data)
                                                         cut.append(i)
-                                                        print("cutting" + str(i) + " with 2")
+                                                        print("cutting" + str(i) + " with 1")
                                                 if json_data[i-1] == '"':
                                                     if json_data[i-2] != ":":
                                                         json_data = list(json_data)
@@ -317,8 +412,26 @@ class Converter:
                                         except:
                                             1+1
                                 
-                                for j in range(0, len(json_data)):
-                                    if json_data[j] == ""
+                                """
+
+                                # Replace with "" instead of "'"
+                                    Replace all "'" or '"' inside of the two main with an empty string...
+
+                                for j in range(0, json_data.count('"')):
+                                    inside = []
+                                    for j in range(0, len(json_data)):
+                                        if json_data[j] == '"':
+                                            while state == "True":
+                                                j += 1
+                                                if json_data[j] == '"':
+                                                    if json_data[j+1] != "}" and json_data[j+1] != ",":
+                                                        state = "False"
+                                                else:
+                                                    inside.append(j)
+                                """
+                                            
+
+
 
 
 
@@ -359,9 +472,9 @@ class Converter:
                                                                 "viewCountText": {
                                                                     "simpleText": "247,705,544 views"
                                 """
-                                print(json_data.keys())
-                                print(json_data["contents"])
-                                print(json_data["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]["contents"][0])
+                                #print(json_data.keys())
+                                #print(json_data["contents"])
+                                #print(json_data["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]["contents"][0])
                                 
                                 """
                                 for i in range(0, len(json_data"contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]["contents"[0]]["itemSectionRenderer"]["contents"])):
@@ -376,6 +489,22 @@ class Converter:
             print(playlist_string)
             print(""*2)
             print(pd.DataFrame({"Songs":Songs, "Artists":Art}))
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Converter = Converter(input("Give me the URL for the Spotify playlist here: "), input("Would you like all of the songs [YES]? Would you like the first 30 songs [NO]?: "))
 Converter.Convert_Complex()
